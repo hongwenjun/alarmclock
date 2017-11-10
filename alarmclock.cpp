@@ -1,7 +1,9 @@
-﻿#include <stdio.h>
+#include <stdio.h>
 #include <string.h>
 #include <time.h>
 #include <windows.h>
+#include <string>
+#include <regex>
 
 ///    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, :, '空', '/' 13个点阵字体
 static char* num_fonts[] = {
@@ -62,20 +64,21 @@ char* str2fonts(char* str, char ch, char* str_fonts)
             pch = strtok(NULL, "\n");
         }
     }
-    
+
     len = strlen(ft_line[0]) + 1;
     for (int i = 0 ; i != 5; i++) {     //把5行字符写到输入参数里
         sprintf(str_fonts + (i * len), "%s\n", ft_line[i]);
     }
-    
+
     return str_fonts;
 }
+
 
 int main(int argc, char* argv[])
 {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_GREEN); //设置文字绿色
     // http://blog.csdn.net/hongwenjun/article/details/6202127 更多控制台颜色设置，访问这个URL
-    
+
     HANDLE hOut;
     CONSOLE_SCREEN_BUFFER_INFO bInfo;
     hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -94,15 +97,23 @@ int main(int argc, char* argv[])
         cnt = s;
     }
 
+    std::string rs = "\\*";
+    std::string rs2 = " ";
+    std::regex exp_star(rs);
+    std::regex exp_space(rs2);
+
     while (1) {
         time(&rawtime);                             // 获得时间，格式化时间为字符串
         timeinfo = localtime(&rawtime);
-        strftime(time_str, 80, "%Y/%m/%d %H:%M:%S", timeinfo);
+        strftime(time_str, 80, " %H:%M:%S", timeinfo);
 
         str2fonts(time_str, '*', buf);             // 时间字符串转换成5行字体
-        printf("%s\n倒计时:%d秒", buf, cnt);
 
+        std::string str(buf);
+        str = regex_replace(str, exp_star, std::string("■"));
+        str = regex_replace(str, exp_space, std::string("  "));
 
+        printf("%s\n\t\t\t\t倒计时:%d秒", str.c_str(), cnt);
 
         if (cnt-- == 0) {
             if (argc > 2) {
@@ -113,7 +124,6 @@ int main(int argc, char* argv[])
 
         Sleep(1000);
 
-
         if (cnt < 10) {            // 10秒倒计时 嘀。嘀。嘀
             printf("\a");
         }
@@ -122,10 +132,3 @@ int main(int argc, char* argv[])
     }
     return 0;
 }
-
-
-
-
-
-
-
