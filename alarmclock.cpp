@@ -1,10 +1,10 @@
-#include <stdio.h>
+﻿#include <stdio.h>
 #include <string.h>
 #include <time.h>
 #include <windows.h>
 #include <string>
 #include <regex>
-
+#pragma  warning(disable:4996)
 ///    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, :, '空', '/' 13个点阵字体
 static char* num_fonts[] = {
     "111101101101111B", "110010010010111B", "111001111100111B", "111001111001111B",
@@ -73,6 +73,23 @@ char* str2fonts(char* str, char ch, char* str_fonts)
     return str_fonts;
 }
 
+// 执行命令行
+void execute_command(char* cmdline)
+{
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+
+    ZeroMemory(&pi, sizeof(pi));
+    // Start the child process.
+    CreateProcess(NULL, TEXT(cmdline), NULL, NULL, FALSE, 0,
+                  NULL, NULL, &si, &pi);
+
+    // Close process and thread handles.
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+}
 
 int main(int argc, char* argv[])
 {
@@ -97,32 +114,35 @@ int main(int argc, char* argv[])
         cnt = s;
     }
 
-    std::string rs = "\\*";
+    std::string rs = "@";
     std::string rs2 = " ";
     std::regex exp_star(rs);
     std::regex exp_space(rs2);
+    char* star[] = { "■", "※"};
+    std::string str;
 
     while (1) {
         time(&rawtime);                             // 获得时间，格式化时间为字符串
         timeinfo = localtime(&rawtime);
         strftime(time_str, 80, " %H:%M:%S", timeinfo);
 
-        str2fonts(time_str, '*', buf);             // 时间字符串转换成5行字体
+        str2fonts(time_str, '@', buf);             // 时间字符串转换成5行字体
 
-        std::string str(buf);
-        str = regex_replace(str, exp_star, std::string("■"));
+        str = buf;
+
+        str = regex_replace(str, exp_star, std::string(star[cnt % 2]));
         str = regex_replace(str, exp_space, std::string("  "));
 
         printf("%s\n\t\t\t\t倒计时:%d秒", str.c_str(), cnt);
 
         if (cnt-- == 0) {
             if (argc > 2) {
-                system(argv[2]);      //  闹钟功能: 去执行其他程序，比如调用 foobar2000 播放音乐
+                execute_command(argv[2]);      //  闹钟功能: 去执行其他程序，比如调用 foobar2000 播放音乐
             }
             break;
         }
 
-        Sleep(1000);
+        Sleep(995); // 减掉程序运行时间
 
         if (cnt < 10) {            // 10秒倒计时 嘀。嘀。嘀
             printf("\a");
