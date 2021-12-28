@@ -16,3 +16,20 @@ CodeBlocks SVN 11112版 双11特别版
 http://bbs.csdn.net/topics/392284220
 
 ![](http://img.bbs.csdn.net/upload/201711/10/1510289090_391006.png)
+
+
+## 定时闹钟 For Linux 版本
+
+源码: [tt.cpp下载](https://github.com/hongwenjun/alarmclock/commit/e2f96dee4c898159d15b09004390073dea305a4c)
+
+## 使用 g++ 编译
+
+    g++ tt.cpp -o tt
+
+## 定时器无限循环使用示例,tmux 开启一个后台窗口，输入下面命令
+
+    while :
+    do
+    ./tt 10  "curl -sL 262235.xyz/index.php"
+    done
+
